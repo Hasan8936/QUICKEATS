@@ -1,6 +1,6 @@
-'use client';
 
-import React, { useState } from 'react';
+
+import React from 'react';
 import { zones } from '@/entities/mockData';
 import { calculateSurgeMultiplier, getDemandLevel } from '@/lib/surgeEngine';
 import { TrendingUp, AlertCircle, Zap, Sliders } from 'lucide-react';
