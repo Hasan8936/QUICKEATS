@@ -1,6 +1,6 @@
 # QuickEats - Swiggy-Inspired Food Delivery Platform
 
-A **production-grade food delivery web application** with **dynamic surge pricing**, built with Next.js 13 App Router, TypeScript, and Tailwind CSS. This project demonstrates a complete **system design** for a Swiggy-like platform.  https://quickeats-inky.vercel.app/
+A **production-grade food delivery web application** with **dynamic surge pricing**, built with Next.js 13 App Router, TypeScript, and Tailwind CSS. This project demonstrates a complete **system design** for a Swiggy-like platform. [ https://quickeats-inky.vercel.app/](https://quickeats34.netlify.app/)
 
 ## 🎯 Project Overview
 
