@@ -23,8 +23,8 @@ export default function SurgePage() {
       multiplier: surgeData.multiplier || 1.0,
       demand: getDemandLevel(surgeData.multiplier || 1.0),
     };
-  }) 
- );
+  })
+);
 
   const currentZone = zoneData.find((z) => z.id === selectedZone.id) || zoneData[0];
 
