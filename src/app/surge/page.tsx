@@ -1,15 +1,11 @@
 import React from 'react';
-import { getZones } from '@/entities/mockData'; // Add this line
+import { zones } from '@/entities/mockData'; // Import zones instead
 import { calculateSurgeMultiplier, getDemandLevel } from '@/lib/surgeEngine';
 import { TrendingUp, AlertCircle, Zap, Sliders } from 'lucide-react';
 import { SurgeBadge } from '@/components/SurgeBadge';
 
 export default async function SurgePage() {
-  const zones = await getZones({
-    minSurge: 1.0,
-    maxSurge: 1.9,
-  });
-
+  // Remove the getZones call, use zones directly
   const zoneData = await Promise.all(
     zones.map(async (zone) => {
       const surgeData = await calculateSurgeMultiplier(zone.name);
