@@ -6,25 +6,25 @@ import { calculateSurgeMultiplier, getDemandLevel } from '@/lib/surgeEngine';
 import { TrendingUp, AlertCircle, Zap, Sliders } from 'lucide-react';
 import { SurgeBadge } from '@/components/SurgeBadge';
 
-export default function SurgePage() {
-  const [selectedZone, setSelectedZone] = useState(zones[0]);
-  const [config, setConfig] = useState({
-    demandThreshold: 4,
-    supplyThreshold: 15,
+export default async function SurgePage() {
+  const zones = await getZones({
+    minSurge: 1.0,
     maxSurge: 1.9,
   });
 
- const zoneData = await Promise.all(
-  zones.map(async (zone) => {
-    const surgeData = await calculateSurgeMultiplier(zone.name);
-    return {
-      ...zone,
-      surge: surgeData,
-      multiplier: surgeData.multiplier || 1.0,
-      demand: getDemandLevel(surgeData.multiplier || 1.0),
-    };
-  })
-);
+  const zoneData = await Promise.all(
+    zones.map(async (zone) => {
+      const surgeData = await calculateSurgeMultiplier(zone.name);
+      return {
+        ...zone,
+        surge: surgeData,
+        multiplier: surgeData.multiplier || 1.0,
+        demand: getDemandLevel(surgeData.multiplier || 1.0),
+      };
+    })
+  );
+
+ 
 
   const currentZone = zoneData.find((z) => z.id === selectedZone.id) || zoneData[0];
 
