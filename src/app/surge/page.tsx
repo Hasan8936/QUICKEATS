@@ -1,8 +1,8 @@
 import React from 'react';
+import { getZones } from '@/entities/mockData'; // Add this line
 import { calculateSurgeMultiplier, getDemandLevel } from '@/lib/surgeEngine';
 import { TrendingUp, AlertCircle, Zap, Sliders } from 'lucide-react';
 import { SurgeBadge } from '@/components/SurgeBadge';
-// ... any other imports you need
 
 export default async function SurgePage() {
   const zones = await getZones({
