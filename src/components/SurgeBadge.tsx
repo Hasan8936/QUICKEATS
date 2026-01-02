@@ -8,9 +8,12 @@ interface SurgeBadgeProps {
 }
 
 export function SurgeBadge({ multiplier, showLabel = true, size = 'md' }: SurgeBadgeProps) {
-  if (multiplier <= 1.0) return null;
+  // Ensure multiplier is a number
+  const numMultiplier = typeof multiplier === 'number' ? multiplier : parseFloat(multiplier as any) || 1.0;
+  
+  if (numMultiplier <= 1.0) return null;
 
-  const demandLevel = getDemandLevel(multiplier);
+  const demandLevel = getDemandLevel(numMultiplier);
   
   const colorMap = {
     low: 'bg-[#F0F9FF] text-[var(--color-text-primary)] border-blue-200',
@@ -38,7 +41,7 @@ export function SurgeBadge({ multiplier, showLabel = true, size = 'md' }: SurgeB
         <TrendingUp className="w-3 h-3" />
       )}
       {showLabel && <span>{labelMap[demandLevel]}</span>}
-      <span className="font-bold">{multiplier.toFixed(1)}x</span>
+      <span className="font-bold">{numMultiplier.toFixed(1)}x</span>
     </div>
   );
 }

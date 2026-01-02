@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Clock } from 'lucide-react';
 import { zones } from '@/entities/mockData';
 import { calculateSurgeMultiplier } from '@/lib/surgeEngine';
@@ -13,6 +13,28 @@ type ZoneWithPerformance = Zone & {
 
 export default function AnalyticsPage() {
   const [timePeriod, setTimePeriod] = useState('month');
+  const [zonePerformance, setZonePerformance] = useState<ZoneWithPerformance[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadZonePerformance = async () => {
+      setLoading(true);
+      const performanceData = await Promise.all(
+        zones.map(async (zone: Zone) => {
+          const surgeData = await calculateSurgeMultiplier(zone.id);
+          return {
+            ...zone,
+            surge: surgeData.multiplier,
+            revenue: Math.random() * 500000,
+          };
+        })
+      );
+      setZonePerformance(performanceData);
+      setLoading(false);
+    };
+
+    loadZonePerformance();
+  }, []);
 
   // Mock analytics data
   const analyticsData = {
@@ -30,12 +52,6 @@ export default function AnalyticsPage() {
     { label: 'Surcharge', value: 580000, percentage: 31.4, color: 'danger' },
     { label: 'Commissions', value: 240000, percentage: 12.9, color: 'success' },
   ];
-
-  const zonePerformance: ZoneWithPerformance[] = zones.map((zone: Zone) => ({
-    ...zone,
-    surge: calculateSurgeMultiplier(zone),
-    revenue: Math.random() * 500000,
-  }));
 
   const formatCurrency = (value: number) => {
     return `₹${(value / 100000).toFixed(1)}L`;
@@ -150,29 +166,34 @@ export default function AnalyticsPage() {
         <h2 className="text-lg font-bold text-[var(--color-text-primary)] mb-4">
           Zone Performance
         </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[var(--color-background)] border-b border-[var(--color-border)]">
-              <tr>
-                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Zone
-                </th>
-                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Orders
-                </th>
-                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Revenue
-                </th>
-                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Surge
-                </th>
-                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Partners
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {zonePerformance.map((zone, idx) => (
+        {loading ? (
+          <div className="text-center py-8 text-[var(--color-text-muted)]">
+            Loading zone performance data...
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[var(--color-background)] border-b border-[var(--color-border)]">
+                <tr>
+                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
+                    Zone
+                  </th>
+                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
+                    Orders
+                  </th>
+                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
+                    Revenue
+                  </th>
+                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
+                    Surge
+                  </th>
+                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
+                    Partners
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {zonePerformance.map((zone, idx) => (
                 <tr
                   key={zone.id}
                   className={`border-b border-[var(--color-border)] ${
@@ -211,6 +232,7 @@ export default function AnalyticsPage() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/* Recent Orders */}

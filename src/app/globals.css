@@ -48,8 +48,9 @@ body {
     }
     .card-interactive {
         @apply card cursor-pointer;
-        @apply hover:shadow-[var(--shadow-md)];
-        @apply hover:border-[var(--color-primary-orange)];
+    }
+    .card-interactive:hover {
+        @apply shadow-[var(--shadow-md)] border-[var(--color-primary-orange)];
     }
     .btn-primary {
         @apply px-4 py-2.5 bg-[var(--color-primary-orange)] text-white rounded-lg font-semibold transition-all duration-200 hover: bg-[var(--color-primary-orange-dark)] active: scale-95;

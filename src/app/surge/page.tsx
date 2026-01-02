@@ -14,11 +14,15 @@ export default function SurgePage() {
     maxSurge: 1.9,
   });
 
-  const zoneData = zones.map((zone) => ({
-    ...zone,
-    surge: calculateSurgeMultiplier(zone),
-    demand: getDemandLevel(calculateSurgeMultiplier(zone)),
-  }));
+  const zoneData = zones.map((zone) => {
+    const surgeData = calculateSurgeMultiplier(zone);
+    return {
+      ...zone,
+      surge: surgeData,
+      multiplier: surgeData.multiplier || 1.0,
+      demand: getDemandLevel(surgeData.multiplier || 1.0),
+    };
+  });
 
   const currentZone = zoneData.find((z) => z.id === selectedZone.id) || zoneData[0];
 
@@ -56,7 +60,7 @@ export default function SurgePage() {
               <p className="font-semibold text-sm text-[var(--color-text-primary)]">
                 {zone.name.split(' - ')[1]}
               </p>
-              <SurgeBadge multiplier={zone.surge} showLabel={false} size="sm" />
+              <SurgeBadge multiplier={zone.multiplier} showLabel={false} size="sm" />
             </button>
           ))}
         </div>
@@ -70,7 +74,7 @@ export default function SurgePage() {
             <Zap className="w-5 h-5 text-[var(--color-primary-orange)]" />
           </div>
           <p className="text-3xl font-bold text-[var(--color-text-primary)]">
-            {currentZone.surge}x
+            {currentZone.multiplier.toFixed(1)}x
           </p>
         </div>
         <div className="card p-6">
@@ -257,7 +261,7 @@ export default function SurgePage() {
                     {zone.name}
                   </td>
                   <td className="px-6 py-4">
-                    <SurgeBadge multiplier={zone.surge} size="sm" />
+                    <SurgeBadge multiplier={zone.multiplier} size="sm" />
                   </td>
                   <td className="px-6 py-4">
                     <span className="capitalize font-medium text-[var(--color-text-secondary)]">

@@ -13,6 +13,22 @@ const nextConfig = {
         NEXT_PUBLIC_APP_NAME: 'QuickEats',
     },
 
+    // Webpack configuration to handle node modules
+    webpack: (config, { isServer }) => {
+        if (!isServer) {
+            config.resolve.fallback = {
+                ...config.resolve.fallback,
+                ioredis: false,
+                dns: false,
+                net: false,
+                tls: false,
+                fs: false,
+                path: false,
+            };
+        }
+        return config;
+    },
+
     // Headers
     headers: async() => {
         return [{
