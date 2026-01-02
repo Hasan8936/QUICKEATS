@@ -20,7 +20,7 @@ export default async function SurgePage() {
 
  
 
-  const currentZone = zoneData.find((z) => z.id === selectedZone.id) || zoneData[0];
+  const currentZone = zoneData[0];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
