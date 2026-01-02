@@ -14,7 +14,7 @@ export default function HomePage() {
   const zoneRestaurants = restaurants.filter((r) => r.zone === selectedZone.id);
 
   // Calculate surge multiplier for the zone
-  const surgeMultiplier = calculateSurgeMultiplier(selectedZone);
+  const surgeMultiplier = calculateSurgeMultiplier(selectedZone.id);
 
   const handleRestaurantClick = (restaurantId: string) => {
     // TODO: Navigate to restaurant detail page
