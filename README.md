@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # QUICKEATS
 =======
 # QuickEats - Swiggy-Inspired Food Delivery Platform
