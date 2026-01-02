@@ -15,7 +15,7 @@ export default function SurgePage() {
   });
 
   const zoneData = zones.map((zone) => {
-    const surgeData = calculateSurgeMultiplier(zone);
+  const surgeData = calculateSurgeMultiplier(zone.name);
     return {
       ...zone,
       surge: surgeData,
