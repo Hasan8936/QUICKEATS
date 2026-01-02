@@ -6,7 +6,11 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "moduleResolution": "bundler"
+    "moduleResolution": "node"
   },
-  "include": ["next.config.js"]
+  "include": [
+    "next.config.js",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
 }

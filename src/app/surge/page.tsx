@@ -1,26 +1,54 @@
-import React from 'react';
-import { zones } from '@/entities/mockData'; // Import zones instead
-import { calculateSurgeMultiplier, getDemandLevel } from '@/lib/surgeEngine';
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { zones } from '../../entities/mockData';
+import { calculateSurgeMultiplier, getDemandLevel } from '../../lib/surgeEngine';
 import { TrendingUp, AlertCircle, Zap, Sliders } from 'lucide-react';
-import { SurgeBadge } from '@/components/SurgeBadge';
+import { SurgeBadge } from '../../components/SurgeBadge';
 
-export default async function SurgePage() {
-  // Remove the getZones call, use zones directly
-  const zoneData = await Promise.all(
-    zones.map(async (zone) => {
-      const surgeData = await calculateSurgeMultiplier(zone.name);
-      return {
-        ...zone,
-        surge: surgeData,
-        multiplier: surgeData.multiplier || 1.0,
-        demand: getDemandLevel(surgeData.multiplier || 1.0),
-      };
-    })
-  );
+export default function SurgePage() {
+  const [selectedZone, setSelectedZone] = useState(zones[0]);
+  const [config, setConfig] = useState({
+    demandThreshold: 4,
+    supplyThreshold: 15,
+    maxSurge: 1.9,
+  });
+  const [zoneData, setZoneData] = useState<Array<{
+    id: string;
+    name: string;
+    surgeMultiplier?: number;
+    deliveryPartnersAvailable?: number;
+    ordersInZone?: number;
+    estimatedWait?: number;
+    surge: { multiplier: number; label: string; reason: string };
+    multiplier: number;
+    demand: 'low' | 'medium' | 'high' | 'critical';
+  }>>([]);
 
- 
+  useEffect(() => {
+    const fetchZoneData = async () => {
+      const data = await Promise.all(
+        zones.map(async (zone: { id: string; name: string }) => {
+          const surgeData = await calculateSurgeMultiplier(zone.id);
+          return {
+            ...zone,
+            surge: surgeData,
+            multiplier: surgeData.multiplier || 1.0,
+            demand: getDemandLevel(surgeData.multiplier || 1.0),
+          };
+        })
+      );
+      setZoneData(data);
+    };
 
-  const currentZone = zoneData[0];
+    fetchZoneData();
+  }, []);
+
+  if (zoneData.length === 0) {
+    return <div>Loading...</div>; // Display a loading state until zoneData is populated
+  }
+
+  const currentZone = zoneData.find((z: { id: string }) => z.id === selectedZone.id) || zoneData[0];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -97,7 +125,7 @@ export default async function SurgePage() {
             <TrendingUp className="w-5 h-5 text-[var(--color-success)]" />
           </div>
           <p className="text-3xl font-bold text-[var(--color-text-primary)]">
-            {currentZone.deliveryPartnersAvailable}
+            {currentZone.deliveryPartnersAvailable ?? 0}
           </p>
         </div>
       </div>
@@ -270,14 +298,14 @@ export default async function SurgePage() {
                   <td className="px-6 py-4">
                     <span
                       className={`font-bold ${
-                        zone.deliveryPartnersAvailable > 30
+                        (zone.deliveryPartnersAvailable ?? 0) > 30
                           ? 'text-[var(--color-success)]'
-                          : zone.deliveryPartnersAvailable > 15
+                          : (zone.deliveryPartnersAvailable ?? 0) > 15
                             ? 'text-[var(--color-warning)]'
                             : 'text-[var(--color-danger)]'
                       }`}
                     >
-                      {zone.deliveryPartnersAvailable}
+                      {zone.deliveryPartnersAvailable ?? 0}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-[var(--color-text-secondary)]">

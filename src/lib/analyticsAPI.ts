@@ -1,5 +1,4 @@
 import { Redis } from 'ioredis';
-import mongoose from 'mongoose';
 import { OrderEvent, SurgeEvent, TrafficMetric } from '@/db/mongoose/schemas';
 
 const redis = new Redis();
