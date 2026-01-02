@@ -14,15 +14,17 @@ export default function SurgePage() {
     maxSurge: 1.9,
   });
 
-  const zoneData = zones.map((zone) => {
-  const surgeData = calculateSurgeMultiplier(zone.name);
+ const zoneData = await Promise.all(
+  zones.map(async (zone) => {
+    const surgeData = await calculateSurgeMultiplier(zone.name);
     return {
       ...zone,
       surge: surgeData,
       multiplier: surgeData.multiplier || 1.0,
       demand: getDemandLevel(surgeData.multiplier || 1.0),
     };
-  });
+  }) 
+ );
 
   const currentZone = zoneData.find((z) => z.id === selectedZone.id) || zoneData[0];
 
