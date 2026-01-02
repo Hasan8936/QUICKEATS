@@ -77,6 +77,34 @@ export default function RootLayout({
                 )}
               </div>
 
+              {/* Navigation Links */}
+              <div className="hidden sm:flex items-center gap-6">
+                <a
+                  href="/"
+                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
+                >
+                  Dashboard
+                </a>
+                <a
+                  href="/analytics"
+                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
+                >
+                  Analytics Dashboard
+                </a>
+                <a
+                  href="/partners"
+                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
+                >
+                  Partner Page
+                </a>
+                <a
+                  href="/surge"
+                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
+                >
+                  Surge Page
+                </a>
+              </div>
+
               {/* Cart Icon */}
               <button className="relative flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[var(--color-background)] transition-colors group">
                 <ShoppingCart className="w-6 h-6 text-[var(--color-text-primary)] group-hover:text-[var(--color-primary-orange)]" />
