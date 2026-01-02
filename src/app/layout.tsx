@@ -103,6 +103,12 @@ export default function RootLayout({
                 >
                   Surge Page
                 </a>
+                <a
+                  href="/cart"
+                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
+                >
+                  Cart System
+                </a>
               </div>
 
               {/* Cart Icon */}
