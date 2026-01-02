@@ -112,14 +112,14 @@ export default function RootLayout({
               </div>
 
               {/* Cart Icon */}
-              <button className="relative flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[var(--color-background)] transition-colors group">
+              <a href="/cart" className="relative flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[var(--color-background)] transition-colors group">
                 <ShoppingCart className="w-6 h-6 text-[var(--color-text-primary)] group-hover:text-[var(--color-primary-orange)]" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-[var(--color-danger)] text-white text-xs font-bold rounded-full">
                     {cartCount}
                   </span>
                 )}
-              </button>
+              </a>
             </div>
           </div>
         </nav>
