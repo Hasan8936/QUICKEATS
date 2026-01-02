@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { restaurants, zones } from '@/entities/mockData';
 import { calculateSurgeMultiplier } from '@/lib/surgeEngine';
 import { RestaurantCard } from '@/components/RestaurantCard';
@@ -9,12 +9,19 @@ import { MapPin, Utensils } from 'lucide-react';
 export default function HomePage() {
   const [selectedZone, setSelectedZone] = useState(zones[0]);
   const [isZoneOpen, setIsZoneOpen] = useState(false);
+  const [surgeMultiplier, setSurgeMultiplier] = useState(1.0);
 
   // Filter restaurants by selected zone
   const zoneRestaurants = restaurants.filter((r) => r.zone === selectedZone.id);
 
   // Calculate surge multiplier for the zone
-  const surgeMultiplier = calculateSurgeMultiplier(selectedZone.id);
+  useEffect(() => {
+    const fetchSurgeMultiplier = async () => {
+      const result = await calculateSurgeMultiplier(selectedZone.id);
+      setSurgeMultiplier(result.multiplier);
+    };
+    fetchSurgeMultiplier();
+  }, [selectedZone.id]);
 
   const handleRestaurantClick = (restaurantId: string) => {
     // TODO: Navigate to restaurant detail page
