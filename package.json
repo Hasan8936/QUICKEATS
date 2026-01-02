@@ -10,7 +10,7 @@
         "lint": "next lint",
         "type-check": "tsc --noEmit",
         "test": "jest",
-        "postinstall": "prisma generate"
+        "postinstall": "prisma generate --schema=src/db/prisma/schema.prisma"
     },
     "dependencies": {
         "@prisma/client": "^5.0.0",
