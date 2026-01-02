@@ -3,19 +3,6 @@
     "devCommand": "npm run dev",
     "installCommand": "npm ci",
     "framework": "nextjs",
-    "env": {
-        "NEXT_PUBLIC_APP_NAME": "QuickEats",
-        "DATABASE_URL": "@postgres_database_url",
-        "MONGODB_URI": "@mongodb_uri",
-        "REDIS_URL": "@redis_url",
-        "SESSION_SECRET": "@session_secret"
-    },
-    "functions": {
-        "api/**/*.ts": {
-            "memory": 256,
-            "maxDuration": 60
-        }
-    },
     "headers": [{
         "source": "/:path*",
         "headers": [{
