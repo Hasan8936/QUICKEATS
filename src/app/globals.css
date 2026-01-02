@@ -47,7 +47,9 @@ body {
         @apply bg-white rounded-lg border border-[var(--color-border)] shadow-[var(--shadow-sm)] transition-all duration-200;
     }
     .card-interactive {
-        @apply card cursor-pointer hover: shadow-[var(--shadow-md)] hover: border-[var(--color-primary-orange)];
+        @apply card cursor-pointer;
+        @apply hover:shadow-[var(--shadow-md)];
+        @apply hover:border-[var(--color-primary-orange)];
     }
     .btn-primary {
         @apply px-4 py-2.5 bg-[var(--color-primary-orange)] text-white rounded-lg font-semibold transition-all duration-200 hover: bg-[var(--color-primary-orange-dark)] active: scale-95;

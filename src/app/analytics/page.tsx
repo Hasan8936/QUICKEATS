@@ -4,6 +4,12 @@ import React, { useState } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Clock } from 'lucide-react';
 import { zones } from '@/entities/mockData';
 import { calculateSurgeMultiplier } from '@/lib/surgeEngine';
+import { Zone } from '@/types';
+
+type ZoneWithPerformance = Zone & {
+  revenue: number;
+  surge: number;
+};
 
 export default function AnalyticsPage() {
   const [timePeriod, setTimePeriod] = useState('month');
@@ -25,7 +31,7 @@ export default function AnalyticsPage() {
     { label: 'Commissions', value: 240000, percentage: 12.9, color: 'success' },
   ];
 
-  const zonePerformance = zones.map((zone) => ({
+  const zonePerformance: ZoneWithPerformance[] = zones.map((zone: Zone) => ({
     ...zone,
     surge: calculateSurgeMultiplier(zone),
     revenue: Math.random() * 500000,
