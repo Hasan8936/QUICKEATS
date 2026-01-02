@@ -4,22 +4,11 @@
     "installCommand": "npm ci",
     "framework": "nextjs",
     "env": {
-        "NEXT_PUBLIC_APP_NAME": {
-            "description": "Application name",
-            "default": "QuickEats"
-        },
-        "DATABASE_URL": {
-            "description": "PostgreSQL database URL"
-        },
-        "MONGODB_URI": {
-            "description": "MongoDB connection string"
-        },
-        "REDIS_URL": {
-            "description": "Redis URL for caching"
-        },
-        "SESSION_SECRET": {
-            "description": "Session encryption secret"
-        }
+        "NEXT_PUBLIC_APP_NAME": "QuickEats",
+        "DATABASE_URL": "@postgres_database_url",
+        "MONGODB_URI": "@mongodb_uri",
+        "REDIS_URL": "@redis_url",
+        "SESSION_SECRET": "@session_secret"
     },
     "functions": {
         "api/**/*.ts": {
