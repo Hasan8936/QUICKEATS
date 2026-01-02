@@ -21,10 +21,6 @@
             "description": "Session encryption secret"
         }
     },
-    "buildRegions": [
-        "pdx1",
-        "iad1"
-    ],
     "functions": {
         "api/**/*.ts": {
             "memory": 256,
