@@ -53,6 +53,11 @@ const nextConfig = {
             permanent: false,
         }, ];
     },
+
+    // Custom server runtime configuration
+    serverRuntimeConfig: {
+        socketPort: process.env.SOCKET_PORT || 3001,
+    },
 };
 
 module.exports = nextConfig;
