@@ -1,0 +1,16 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 200
+      name: "Warmup"
+    - duration: 120
+      arrivalRate: 1000
+      name: "Spike"
+    - duration: 180
+      arrivalRate: 2000
+      name: "Sustained"
+scenarios:
+  - flow:
+      - get:
+          url: "/"

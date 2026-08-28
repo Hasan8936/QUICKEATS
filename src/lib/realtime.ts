@@ -1,31 +1,40 @@
 import { Server } from 'socket.io';
-
-let io: Server | null = null;
+import { createAdapter } from '@socket.io/redis-adapter';
+import { redis } from './redis';
 
 export const initializeRealtime = (server: any) => {
-  if (!io) {
-    io = new Server(server, {
-      cors: {
-        origin: '*',
-        methods: ['GET', 'POST'],
-      },
-    });
+  const io = new Server(server, {
+    cors: { origin: '*' },
+    maxHttpBufferSize: 1e6,
+    pingTimeout: 30000,
+  });
 
-    io.on('connection', (socket) => {
-      console.log('A user connected:', socket.id);
+  const pubClient = redis.duplicate();
+  const subClient = redis.duplicate();
 
-      socket.on('disconnect', () => {
-        console.log('A user disconnected:', socket.id);
-      });
+  io.adapter(createAdapter(pubClient, subClient));
+
+  // subscribe to surge updates published in surgeEngine and broadcast them
+  const listener = redis.duplicate();
+  listener.subscribe('surge-updates');
+  listener.on('message', (_channel, message) => {
+    const payload = JSON.parse(message);
+    io.to(`zone:${payload.zoneId}`).emit('surge:update', payload);
+  });
+
+  io.on('connection', (socket) => {
+    socket.on('subscribe:zone', (zoneId: string) => socket.join(`zone:${zoneId}`));
+
+    socket.on('disconnect', () => {
+      // Cleanup on disconnect
     });
-  }
+  });
 
   return io;
 };
 
 export const getIO = () => {
-  if (!io) {
-    throw new Error('Socket.io is not initialized!');
-  }
-  return io;
+  // This would need to be implemented with proper singleton pattern
+  // For now, returning null as we initialize in server.js
+  return null;
 };

@@ -77,6 +77,19 @@ export default function RootLayout({
                 )}
               </div>
 
+              {/* Search */}
+              <div className="hidden md:flex items-center flex-1 px-4">
+                <div className="w-full max-w-md">
+                  <label htmlFor="nav-search" className="sr-only">Search restaurants</label>
+                  <input
+                    id="nav-search"
+                    type="search"
+                    placeholder="Search restaurants, cuisines or dishes"
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-primary-orange)] focus:outline-none"
+                  />
+                </div>
+              </div>
+
               {/* Navigation Links */}
               <div className="hidden sm:flex items-center gap-6">
                 <a
@@ -102,6 +115,12 @@ export default function RootLayout({
                   className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
                 >
                   Surge Page
+                <a
+                  href="/admin/surge-policies"
+                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
+                >
+                  Surge Policies Admin
+                </a>
                 </a>
                 <a
                   href="/cart"

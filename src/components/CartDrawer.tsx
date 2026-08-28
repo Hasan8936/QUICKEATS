@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Plus, Minus, ShoppingCart } from 'lucide-react';
 import { PriceDisplay } from './PriceDisplay';
 
@@ -32,6 +32,8 @@ export function CartDrawer({
   restaurantName,
 }: CartDrawerProps) {
   const [promoCode, setPromoCode] = useState('');
+  const drawerRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const baseDeliveryFee = deliveryFee;
@@ -40,6 +42,60 @@ export function CartDrawer({
   const total = subtotal + surgeDeliveryFee;
 
   if (!isOpen) return null;
+
+  // Focus trap & accessibility
+  useEffect(() => {
+    // Save previously focused element
+    previouslyFocused.current = document.activeElement as HTMLElement;
+
+    // Lock scroll
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // Focus first tabbable element inside drawer
+    const focusable = drawerRef.current?.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable && focusable.length > 0) {
+      focusable[0].focus();
+    }
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+
+      if (e.key === 'Tab') {
+        // Simple tab trap
+        const nodes = focusable ? Array.from(focusable) : [];
+        if (nodes.length === 0) return;
+        const first = nodes[0];
+        const last = nodes[nodes.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKey);
+
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = prevOverflow;
+      // restore focus
+      try {
+        previouslyFocused.current?.focus();
+      } catch (err) {
+        // ignore
+      }
+    };
+  }, [onClose]);
 
   return (
     <>
@@ -50,14 +106,21 @@ export function CartDrawer({
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-white shadow-[-4px_0_6px_rgba(0,0,0,0.1)] z-50 overflow-y-auto animate-slide-in">
+      <div
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Shopping cart"
+        className="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-white shadow-[-4px_0_6px_rgba(0,0,0,0.1)] z-50 overflow-y-auto animate-slide-in"
+      >
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-[var(--color-border)] p-4">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Your Order</h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-[var(--color-background)] rounded-lg transition-colors"
+              aria-label="Close cart"
+              className="p-2 hover:bg-[var(--color-background)] rounded-lg transition-colors focus-ring"
             >
               <X className="w-5 h-5 text-[var(--color-text-primary)]" />
             </button>

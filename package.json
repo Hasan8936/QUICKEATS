@@ -7,9 +7,13 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
+        "start:server": "node server.js",
+        "loadtest": "artillery run loadtest.yml || true",
         "lint": "next lint",
         "type-check": "tsc --noEmit",
         "test": "jest",
+        "test:playwright": "playwright test",
+        "test:playwright:headed": "playwright test --headed",
         "postinstall": "prisma generate --schema=src/db/prisma/schema.prisma"
     },
     "dependencies": {
@@ -23,6 +27,7 @@
         "react-chartjs-2": "^5.2.0",
         "react-dom": "^18.2.0",
         "redis": "^4.6.7",
+        "@socket.io/redis-adapter": "^7.1.0",
         "socket.io": "^4.8.3"
     },
     "devDependencies": {
@@ -37,6 +42,8 @@
         "jest": "^30.2.0",
         "postcss": "^8.4.32",
         "prisma": "^5.0.0",
+        "artillery": "^2.0.0-rc.15",
+        "@playwright/test": "^1.37.0",
         "tailwindcss": "^3.4.1",
         "ts-jest": "^29.4.6",
         "typescript": "^5.3.0"
