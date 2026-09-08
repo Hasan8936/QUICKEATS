@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ShoppingCart, MapPin, ChevronDown } from 'lucide-react';
-import { zones } from '@/entities/mockData';
+import type { LeanZone } from '@/lib/queries';
 import './globals.css';
 
 export default function RootLayout({
@@ -10,9 +12,46 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [selectedZone, setSelectedZone] = useState(zones[0]);
+  const pathname = usePathname();
+  const [zones, setZones] = useState<LeanZone[]>([]);
+  const [selectedZone, setSelectedZone] = useState<LeanZone | null>(null);
   const [isZoneOpen, setIsZoneOpen] = useState(false);
-  const [cartCount, _setCartCount] = useState(0);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/zones')
+      .then((r) => r.json())
+      .then((data: LeanZone[]) => {
+        setZones(data);
+        setSelectedZone((current) => current ?? data[0] ?? null);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Refresh the cart badge whenever the route changes (e.g. after adding an
+  // item on a restaurant page and navigating back), instead of leaving it
+  // permanently stuck at 0 like the previous version.
+  useEffect(() => {
+    fetch('/api/cart')
+      .then((r) => r.json())
+      .then((cart) => {
+        const count = (cart.items ?? []).reduce(
+          (sum: number, item: { quantity: number }) => sum + item.quantity,
+          0
+        );
+        setCartCount(count);
+      })
+      .catch(() => {});
+  }, [pathname]);
+
+  const navLinks = [
+    { href: '/', label: 'Dashboard' },
+    { href: '/analytics', label: 'Analytics Dashboard' },
+    { href: '/partners', label: 'Partner Page' },
+    { href: '/surge', label: 'Surge Page' },
+    { href: '/admin/surge-policies', label: 'Surge Policies Admin' },
+    { href: '/cart', label: 'Cart System' },
+  ];
 
   return (
     <html lang="en">
@@ -22,60 +61,62 @@ export default function RootLayout({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
-              <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+              <Link href="/" className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
                 <div className="w-8 h-8 bg-[var(--color-primary-orange)] rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">Q</span>
                 </div>
                 <span className="font-bold text-xl text-[var(--color-text-primary)] hidden sm:inline">
                   QuickEats
                 </span>
-              </div>
+              </Link>
 
               {/* Location Selector */}
-              <div className="hidden sm:flex items-center gap-2 relative">
-                <button
-                  onClick={() => setIsZoneOpen(!isZoneOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--color-background)] transition-colors group"
-                >
-                  <MapPin className="w-5 h-5 text-[var(--color-primary-orange)]" />
-                  <span className="text-sm font-medium">{selectedZone.name}</span>
-                  <ChevronDown className="w-4 h-4 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary-orange)]" />
-                </button>
+              {selectedZone && (
+                <div className="hidden sm:flex items-center gap-2 relative">
+                  <button
+                    onClick={() => setIsZoneOpen(!isZoneOpen)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--color-background)] transition-colors group"
+                  >
+                    <MapPin className="w-5 h-5 text-[var(--color-primary-orange)]" />
+                    <span className="text-sm font-medium">{selectedZone.name}</span>
+                    <ChevronDown className="w-4 h-4 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary-orange)]" />
+                  </button>
 
-                {/* Zone Dropdown */}
-                {isZoneOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-[var(--shadow-lg)] border border-[var(--color-border)] z-10">
-                    <div className="p-2">
-                      {zones.map((zone) => (
-                        <button
-                          key={zone.id}
-                          onClick={() => {
-                            setSelectedZone(zone);
-                            setIsZoneOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                            selectedZone.id === zone.id
-                              ? 'bg-[var(--color-primary-orange-light)] text-[var(--color-primary-orange)] font-semibold'
-                              : 'hover:bg-[var(--color-background)] text-[var(--color-text-primary)]'
-                          }`}
-                        >
-                          <div className="flex justify-between items-center">
-                            <span>{zone.name}</span>
-                            {zone.surgeMultiplier > 1 && (
-                              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-[var(--color-warning)] text-white">
-                                {zone.surgeMultiplier}x
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-xs text-[var(--color-text-muted)]">
-                            {zone.deliveryPartnersAvailable} partners • {zone.ordersInZone} orders
-                          </span>
-                        </button>
-                      ))}
+                  {/* Zone Dropdown */}
+                  {isZoneOpen && (
+                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-[var(--shadow-lg)] border border-[var(--color-border)] z-10">
+                      <div className="p-2">
+                        {zones.map((zone) => (
+                          <button
+                            key={zone.id}
+                            onClick={() => {
+                              setSelectedZone(zone);
+                              setIsZoneOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                              selectedZone.id === zone.id
+                                ? 'bg-[var(--color-primary-orange-light)] text-[var(--color-primary-orange)] font-semibold'
+                                : 'hover:bg-[var(--color-background)] text-[var(--color-text-primary)]'
+                            }`}
+                          >
+                            <div className="flex justify-between items-center">
+                              <span>{zone.name}</span>
+                              {zone.surgeMultiplier > 1 && (
+                                <span className="text-xs font-semibold px-2 py-1 rounded-full bg-[var(--color-warning)] text-white">
+                                  {zone.surgeMultiplier}x
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs text-[var(--color-text-muted)]">
+                              {zone.deliveryPartnersAvailable} partners • {zone.ordersInZone} orders
+                            </span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
 
               {/* Search */}
               <div className="hidden md:flex items-center flex-1 px-4">
@@ -92,53 +133,29 @@ export default function RootLayout({
 
               {/* Navigation Links */}
               <div className="hidden sm:flex items-center gap-6">
-                <a
-                  href="/"
-                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
-                >
-                  Dashboard
-                </a>
-                <a
-                  href="/analytics"
-                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
-                >
-                  Analytics Dashboard
-                </a>
-                <a
-                  href="/partners"
-                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
-                >
-                  Partner Page
-                </a>
-                <a
-                  href="/surge"
-                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
-                >
-                  Surge Page
-                <a
-                  href="/admin/surge-policies"
-                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
-                >
-                  Surge Policies Admin
-                </a>
-                </a>
-                <a
-                  href="/cart"
-                  className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
-                >
-                  Cart System
-                </a>
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-primary-orange)] transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
               </div>
 
               {/* Cart Icon */}
-              <a href="/cart" className="relative flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[var(--color-background)] transition-colors group">
+              <Link
+                href="/cart"
+                className="relative flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[var(--color-background)] transition-colors group"
+              >
                 <ShoppingCart className="w-6 h-6 text-[var(--color-text-primary)] group-hover:text-[var(--color-primary-orange)]" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-[var(--color-danger)] text-white text-xs font-bold rounded-full">
                     {cartCount}
                   </span>
                 )}
-              </a>
+              </Link>
             </div>
           </div>
         </nav>

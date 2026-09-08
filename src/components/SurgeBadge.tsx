@@ -1,5 +1,5 @@
 import { AlertCircle, TrendingUp } from 'lucide-react';
-import { getDemandLevel } from '@/lib/surgeEngine';
+import { getDemandLevel } from '@/lib/demand';
 
 interface SurgeBadgeProps {
   multiplier: number;

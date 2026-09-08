@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { RestaurantCard } from '@/components/RestaurantCard';
 import { CartDrawer, CartItem } from '@/components/CartDrawer';
-import { zones, restaurants } from '@/entities/mockData';
+import { restaurants } from '@/entities/mockData';
 
 export default function UITestsPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,12 +30,12 @@ export default function UITestsPage() {
               key={r.id}
               id={r.id}
               name={r.name}
-              cuisine={r.cuisines.join(', ')}
+              cuisine={r.cuisine}
               image={r.image}
               rating={r.rating}
               deliveryFee={r.deliveryFee}
               deliveryTime={r.deliveryTime}
-              surgeMultiplier={r.surgeMultiplier || 1}
+              surgeMultiplier={1}
             />
           ))}
         </div>

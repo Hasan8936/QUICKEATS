@@ -1,40 +1,39 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { zones } from '../../entities/mockData';
-import { calculateSurgeMultiplier, getDemandLevel } from '../../lib/surgeEngine';
 import { TrendingUp, AlertCircle, Zap, Sliders } from 'lucide-react';
 import { SurgeBadge } from '../../components/SurgeBadge';
+import type { LeanZone } from '@/lib/queries';
+
+interface ZoneWithSurge extends LeanZone {
+  multiplier: number;
+  demand: 'low' | 'medium' | 'high' | 'critical';
+  reason: string;
+}
 
 export default function SurgePage() {
-  const [selectedZone, setSelectedZone] = useState(zones[0]);
+  const [zoneData, setZoneData] = useState<ZoneWithSurge[]>([]);
+  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
   const [config, setConfig] = useState({
     demandThreshold: 4,
     supplyThreshold: 15,
     maxSurge: 1.9,
   });
-  const [zoneData, setZoneData] = useState<Array<{
-    id: string;
-    name: string;
-    surgeMultiplier?: number;
-    deliveryPartnersAvailable?: number;
-    ordersInZone?: number;
-    estimatedWait?: number;
-    surge: { multiplier: number; label: string; reason: string };
-    multiplier: number;
-    demand: 'low' | 'medium' | 'high' | 'critical';
-  }>>([]);
 
   useEffect(() => {
     const fetchZoneData = async () => {
+      const zonesRes = await fetch('/api/zones');
+      const zonesList: LeanZone[] = await zonesRes.json();
+      if (zonesList.length > 0) setSelectedZoneId((current) => current ?? zonesList[0].id);
+
       const data = await Promise.all(
-        zones.map(async (zone: { id: string; name: string }) => {
-          const surgeData = await calculateSurgeMultiplier(zone.id);
+        zonesList.map(async (zone) => {
+          const surge = await fetch(`/api/surge?zoneId=${zone.id}`).then((r) => r.json());
           return {
             ...zone,
-            surge: surgeData,
-            multiplier: surgeData.multiplier || 1.0,
-            demand: getDemandLevel(surgeData.multiplier || 1.0),
+            multiplier: surge.multiplier ?? 1.0,
+            demand: surge.label ?? 'low',
+            reason: surge.reason ?? '',
           };
         })
       );
@@ -42,13 +41,16 @@ export default function SurgePage() {
     };
 
     fetchZoneData();
+    // Poll periodically so the dashboard reflects live order/partner changes.
+    const interval = setInterval(fetchZoneData, 15000);
+    return () => clearInterval(interval);
   }, []);
 
-  if (zoneData.length === 0) {
-    return <div>Loading...</div>; // Display a loading state until zoneData is populated
+  if (zoneData.length === 0 || !selectedZoneId) {
+    return <div className="p-8 text-center text-[var(--color-text-muted)]">Loading…</div>;
   }
 
-  const currentZone = zoneData.find((z: { id: string }) => z.id === selectedZone.id) || zoneData[0];
+  const currentZone = zoneData.find((z) => z.id === selectedZoneId) || zoneData[0];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -71,18 +73,15 @@ export default function SurgePage() {
           {zoneData.map((zone) => (
             <button
               key={zone.id}
-              onClick={() => {
-                const newZone = zones.find((z) => z.id === zone.id);
-                if (newZone) setSelectedZone(newZone);
-              }}
+              onClick={() => setSelectedZoneId(zone.id)}
               className={`p-3 rounded-lg border-2 transition-all ${
-                selectedZone.id === zone.id
+                selectedZoneId === zone.id
                   ? 'border-[var(--color-primary-orange)] bg-[var(--color-primary-orange-light)]'
                   : 'border-[var(--color-border)] hover:border-[var(--color-primary-orange)]'
               }`}
             >
               <p className="font-semibold text-sm text-[var(--color-text-primary)]">
-                {zone.name.split(' - ')[1]}
+                {zone.name.split(' - ')[1] ?? zone.name}
               </p>
               <SurgeBadge multiplier={zone.multiplier} showLabel={false} size="sm" />
             </button>
@@ -249,8 +248,21 @@ export default function SurgePage() {
           </div>
         </div>
 
-        <button className="mt-6 w-full py-2 bg-[var(--color-primary-orange)] text-white rounded-lg font-semibold hover:bg-[var(--color-primary-orange-dark)] transition-colors">
-          Save Configuration
+        <button
+          onClick={async () => {
+            await fetch('/api/surge/policies', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                zoneId: currentZone.id,
+                threshold: config.demandThreshold,
+                multiplier: config.maxSurge,
+              }),
+            });
+          }}
+          className="mt-6 w-full py-2 bg-[var(--color-primary-orange)] text-white rounded-lg font-semibold hover:bg-[var(--color-primary-orange-dark)] transition-colors"
+        >
+          Save Configuration for {currentZone.name}
         </button>
       </div>
 

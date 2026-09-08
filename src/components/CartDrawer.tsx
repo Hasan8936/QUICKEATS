@@ -17,6 +17,8 @@ interface CartDrawerProps {
   onClose: () => void;
   items: CartItem[];
   onUpdateQuantity: (itemId: string, quantity: number) => void;
+  onCheckout?: () => void;
+  checkoutDisabled?: boolean;
   deliveryFee: number;
   surgeMultiplier: number;
   restaurantName?: string;
@@ -27,6 +29,8 @@ export function CartDrawer({
   onClose,
   items,
   onUpdateQuantity,
+  onCheckout,
+  checkoutDisabled,
   deliveryFee,
   surgeMultiplier,
   restaurantName,
@@ -41,10 +45,14 @@ export function CartDrawer({
   const surgeCost = surgeDeliveryFee - baseDeliveryFee;
   const total = subtotal + surgeDeliveryFee;
 
-  if (!isOpen) return null;
-
-  // Focus trap & accessibility
+  // Focus trap & accessibility. This must run unconditionally (Rules of
+  // Hooks) — the previous version put an early `return null` for
+  // `!isOpen` above this useEffect, which meant the hook count changed
+  // between renders whenever isOpen toggled, and React would throw
+  // "Rendered fewer hooks than expected".
   useEffect(() => {
+    if (!isOpen) return;
+
     // Save previously focused element
     previouslyFocused.current = document.activeElement as HTMLElement;
 
@@ -95,7 +103,9 @@ export function CartDrawer({
         // ignore
       }
     };
-  }, [onClose]);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   return (
     <>
@@ -245,10 +255,11 @@ export function CartDrawer({
         {/* CTA Button */}
         <div className="p-4 sticky bottom-0 bg-white">
           <button
-            disabled={items.length === 0}
+            onClick={onCheckout}
+            disabled={items.length === 0 || checkoutDisabled}
             className="w-full py-3 bg-[var(--color-primary-orange)] text-white rounded-lg font-bold transition-all duration-200 hover:bg-[var(--color-primary-orange-dark)] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
           >
-            {items.length === 0 ? 'Add items to checkout' : 'Place Order'}
+            {items.length === 0 ? 'Add items to checkout' : checkoutDisabled ? 'Placing order…' : 'Place Order'}
           </button>
           <p className="text-xs text-center text-[var(--color-text-muted)] mt-2">
             You'll save more with a bigger order

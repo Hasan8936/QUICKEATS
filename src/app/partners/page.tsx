@@ -1,12 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
-import { deliveryPartners, zones } from '@/entities/mockData';
+import React, { useState, useEffect } from 'react';
 import { Star, MapPin, Bike, Truck } from 'lucide-react';
+import type { LeanZone, LeanPartner } from '@/lib/queries';
 
 export default function PartnersPage() {
-  const [selectedZone, setSelectedZone] = useState(zones[0]);
+  const [zones, setZones] = useState<LeanZone[]>([]);
+  const [deliveryPartners, setDeliveryPartners] = useState<LeanPartner[]>([]);
+  const [selectedZone, setSelectedZone] = useState<LeanZone | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'available' | 'busy' | 'offline'>('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/zones').then((r) => r.json()),
+      fetch('/api/partners').then((r) => r.json()),
+    ]).then(([zonesData, partnersData]) => {
+      setZones(zonesData);
+      setDeliveryPartners(partnersData);
+      setSelectedZone(zonesData[0] ?? null);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading || !selectedZone) {
+    return <div className="p-8 text-center text-[var(--color-text-muted)]">Loading partners…</div>;
+  }
 
   const zonePartners = deliveryPartners.filter((p) => p.zone === selectedZone.id);
 

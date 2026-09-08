@@ -13,23 +13,16 @@ const nextConfig = {
         NEXT_PUBLIC_APP_NAME: 'QuickEats',
     },
 
-    // Webpack configuration to handle node modules
-    webpack: (config, { isServer }) => {
-        if (!isServer) {
-            config.resolve.fallback = {
-                ...config.resolve.fallback,
-                ioredis: false,
-                dns: false,
-                net: false,
-                tls: false,
-                fs: false,
-                path: false,
-            };
-        }
-        return config;
+    // Redirects
+    redirects: async() => {
+        return [{
+            source: '/dashboard',
+            destination: '/analytics',
+            permanent: false,
+        }, ];
     },
 
-    // Headers
+    // Security headers
     headers: async() => {
         return [{
             source: '/:path*',
@@ -43,20 +36,6 @@ const nextConfig = {
                 },
             ],
         }, ];
-    },
-
-    // Redirects
-    redirects: async() => {
-        return [{
-            source: '/dashboard',
-            destination: '/analytics',
-            permanent: false,
-        }, ];
-    },
-
-    // Custom server runtime configuration
-    serverRuntimeConfig: {
-        socketPort: process.env.SOCKET_PORT || 3001,
     },
 };
 

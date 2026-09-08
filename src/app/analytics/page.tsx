@@ -1,61 +1,79 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Clock } from 'lucide-react';
-import { zones } from '@/entities/mockData';
-import { calculateSurgeMultiplier } from '@/lib/surgeEngine';
-import { Zone } from '@/types';
+import { TrendingUp, DollarSign, ShoppingCart, Clock, Star } from 'lucide-react';
 
-type ZoneWithPerformance = Zone & {
-  revenue: number;
+interface ZonePerformance {
+  id: string;
+  name: string;
+  ordersInZone: number;
+  deliveryPartnersAvailable: number;
+  estimatedWait: number;
   surge: number;
-};
+  revenue: number;
+  orders: number;
+}
+
+interface AnalyticsData {
+  totalOrders: number;
+  totalRevenue: number;
+  avgOrderValue: number;
+  deliveredOrders: number;
+  avgEstimatedWait: number;
+  avgRestaurantRating: number;
+  revenueBreakdown: { foodSubtotal: number; deliveryFees: number };
+  dailyOrderCounts: { date: string; count: number }[];
+  zonePerformance: ZonePerformance[];
+}
+
+interface RecentOrder {
+  _id: string;
+  restaurantId: string;
+  finalAmount: number;
+  status: string;
+  createdAt: string;
+}
 
 export default function AnalyticsPage() {
   const [timePeriod, setTimePeriod] = useState('month');
-  const [zonePerformance, setZonePerformance] = useState<ZoneWithPerformance[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [restaurantNames, setRestaurantNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadZonePerformance = async () => {
+    const load = async () => {
       setLoading(true);
-      const performanceData = await Promise.all(
-        zones.map(async (zone: Zone) => {
-          const surgeData = await calculateSurgeMultiplier(zone.id);
-          return {
-            ...zone,
-            surge: surgeData.multiplier,
-            revenue: Math.random() * 500000,
-          };
-        })
+      const [analyticsRes, ordersRes, restaurantsRes] = await Promise.all([
+        fetch('/api/analytics').then((r) => r.json()),
+        fetch('/api/orders?limit=5').then((r) => r.json()),
+        fetch('/api/restaurants').then((r) => r.json()),
+      ]);
+      setAnalytics(analyticsRes);
+      setRecentOrders(ordersRes);
+      setRestaurantNames(
+        Object.fromEntries(restaurantsRes.map((r: { id: string; name: string }) => [r.id, r.name]))
       );
-      setZonePerformance(performanceData);
       setLoading(false);
     };
-
-    loadZonePerformance();
+    load();
   }, []);
 
-  // Mock analytics data
-  const analyticsData = {
-    totalOrders: 4256,
-    totalRevenue: 1850000,
-    avgOrderValue: 435,
-    activeCustomers: 8234,
-    avgDeliveryTime: 32,
-    customerRating: 4.7,
+  const formatCurrency = (value: number) => `₹${(value / 100000).toFixed(1)}L`;
+  const relativeTime = (iso: string) => {
+    const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins} min ago`;
+    return `${Math.round(mins / 60)} hr ago`;
   };
 
-  const revenueBreakdown = [
-    { label: 'Delivery Fees', value: 620000, percentage: 33.5, color: 'orange' },
-    { label: 'Subscription', value: 410000, percentage: 22.2, color: 'blue' },
-    { label: 'Surcharge', value: 580000, percentage: 31.4, color: 'danger' },
-    { label: 'Commissions', value: 240000, percentage: 12.9, color: 'success' },
-  ];
+  if (loading || !analytics) {
+    return <div className="p-8 text-center text-[var(--color-text-muted)]">Loading analytics…</div>;
+  }
 
-  const formatCurrency = (value: number) => {
-    return `₹${(value / 100000).toFixed(1)}L`;
-  };
+  const maxDailyCount = Math.max(1, ...analytics.dailyOrderCounts.map((d) => d.count));
+  const totalRevenueForSplit =
+    analytics.revenueBreakdown.foodSubtotal + analytics.revenueBreakdown.deliveryFees || 1;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -65,11 +83,13 @@ export default function AnalyticsPage() {
           Analytics Dashboard
         </h1>
         <p className="text-[var(--color-text-muted)]">
-          Comprehensive business metrics and real-time insights
+          Live metrics computed from the orders database
         </p>
       </div>
 
-      {/* Time Period Selector */}
+      {/* Time Period Selector — note: metrics below are all-time; per-period
+          breakdowns would need date filters added to the /api/analytics
+          aggregation. Kept as a UI affordance for a future iteration. */}
       <div className="mb-8 flex gap-2 flex-wrap">
         {['Today', 'Week', 'Month', 'Year'].map((period) => (
           <button
@@ -90,73 +110,77 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <KPICard
           title="Total Orders"
-          value={analyticsData.totalOrders.toLocaleString('en-IN')}
-          trend={12}
+          value={analytics.totalOrders.toLocaleString('en-IN')}
           icon={<ShoppingCart className="w-6 h-6 text-[var(--color-primary-orange)]" />}
         />
         <KPICard
           title="Total Revenue"
-          value={formatCurrency(analyticsData.totalRevenue)}
-          trend={18}
+          value={formatCurrency(analytics.totalRevenue)}
           icon={<DollarSign className="w-6 h-6 text-[var(--color-success)]" />}
         />
         <KPICard
           title="Avg Order Value"
-          value={`₹${analyticsData.avgOrderValue}`}
-          trend={5}
+          value={`₹${analytics.avgOrderValue}`}
           icon={<TrendingUp className="w-6 h-6 text-blue-500" />}
         />
         <KPICard
-          title="Active Customers"
-          value={analyticsData.activeCustomers.toLocaleString('en-IN')}
-          trend={8}
-          icon={<Users className="w-6 h-6 text-purple-500" />}
+          title="Delivered Orders"
+          value={analytics.deliveredOrders.toLocaleString('en-IN')}
+          icon={<ShoppingCart className="w-6 h-6 text-purple-500" />}
         />
         <KPICard
-          title="Avg Delivery Time"
-          value={`${analyticsData.avgDeliveryTime} min`}
-          trend={-3}
+          title="Avg. Est. Delivery Time"
+          value={`${analytics.avgEstimatedWait} min`}
           icon={<Clock className="w-6 h-6 text-indigo-500" />}
         />
         <KPICard
-          title="Customer Rating"
-          value={`${analyticsData.customerRating} ⭐`}
-          trend={2}
-          icon={<TrendingUp className="w-6 h-6 text-yellow-500" />}
+          title="Avg. Restaurant Rating"
+          value={`${analytics.avgRestaurantRating} ⭐`}
+          icon={<Star className="w-6 h-6 text-yellow-500" />}
         />
       </div>
 
       {/* Charts & Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Orders Trend */}
+        {/* Orders Trend — real daily counts from the last 12 days */}
         <div className="card p-6">
           <h3 className="text-lg font-bold text-[var(--color-text-primary)] mb-4">
-            Orders Trend
+            Orders Trend (last 12 days)
           </h3>
-          <div className="h-64 bg-[var(--color-background)] rounded-lg flex items-end gap-1 p-4">
-            {[45, 52, 48, 61, 55, 72, 68, 75, 82, 78, 88, 92].map((value, idx) => (
-              <div
-                key={idx}
-                className="flex-1 bg-[var(--color-primary-orange)] rounded-t-lg hover:bg-[var(--color-primary-orange-dark)] transition-colors cursor-pointer"
-                style={{ height: `${(value / 100) * 100}%` }}
-                title={`${value} orders`}
-              />
-            ))}
-          </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-4">
-            📊 Last 12 days showing upward delivery trajectory
-          </p>
+          {analytics.dailyOrderCounts.length > 0 ? (
+            <div className="h-64 bg-[var(--color-background)] rounded-lg flex items-end gap-1 p-4">
+              {analytics.dailyOrderCounts.map((day) => (
+                <div
+                  key={day.date}
+                  className="flex-1 bg-[var(--color-primary-orange)] rounded-t-lg hover:bg-[var(--color-primary-orange-dark)] transition-colors cursor-pointer"
+                  style={{ height: `${(day.count / maxDailyCount) * 100}%` }}
+                  title={`${day.date}: ${day.count} orders`}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-[var(--color-text-muted)] text-sm">
+              No orders placed in the last 12 days yet.
+            </div>
+          )}
         </div>
 
-        {/* Revenue Breakdown */}
+        {/* Revenue Breakdown — real split between food subtotal and delivery fees */}
         <div className="card p-6">
           <h3 className="text-lg font-bold text-[var(--color-text-primary)] mb-4">
             Revenue Breakdown
           </h3>
           <div className="space-y-4">
-            {revenueBreakdown.map((item, idx) => (
-              <RevenueItem key={idx} {...item} />
-            ))}
+            <RevenueItem
+              label="Food Subtotal"
+              percentage={(analytics.revenueBreakdown.foodSubtotal / totalRevenueForSplit) * 100}
+              color="orange"
+            />
+            <RevenueItem
+              label="Delivery Fees (incl. surge)"
+              percentage={(analytics.revenueBreakdown.deliveryFees / totalRevenueForSplit) * 100}
+              color="blue"
+            />
           </div>
         </div>
       </div>
@@ -166,34 +190,19 @@ export default function AnalyticsPage() {
         <h2 className="text-lg font-bold text-[var(--color-text-primary)] mb-4">
           Zone Performance
         </h2>
-        {loading ? (
-          <div className="text-center py-8 text-[var(--color-text-muted)]">
-            Loading zone performance data...
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[var(--color-background)] border-b border-[var(--color-border)]">
-                <tr>
-                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                    Zone
-                  </th>
-                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                    Orders
-                  </th>
-                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                    Revenue
-                  </th>
-                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                    Surge
-                  </th>
-                  <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                    Partners
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {zonePerformance.map((zone, idx) => (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[var(--color-background)] border-b border-[var(--color-border)]">
+              <tr>
+                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Zone</th>
+                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Orders</th>
+                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Revenue</th>
+                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Surge</th>
+                <th className="px-4 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Partners</th>
+              </tr>
+            </thead>
+            <tbody>
+              {analytics.zonePerformance.map((zone, idx) => (
                 <tr
                   key={zone.id}
                   className={`border-b border-[var(--color-border)] ${
@@ -201,10 +210,10 @@ export default function AnalyticsPage() {
                   }`}
                 >
                   <td className="px-4 py-4 font-medium text-[var(--color-text-primary)] text-sm">
-                    {zone.name.split(' - ')[1]}
+                    {zone.name.split(' - ')[1] ?? zone.name}
                   </td>
                   <td className="px-4 py-4 font-medium text-[var(--color-text-primary)] text-sm">
-                    {zone.ordersInZone}
+                    {zone.orders}
                   </td>
                   <td className="px-4 py-4 font-bold text-[var(--color-primary-orange)] text-sm">
                     {formatCurrency(zone.revenue)}
@@ -232,119 +241,67 @@ export default function AnalyticsPage() {
             </tbody>
           </table>
         </div>
-        )}
       </div>
 
-      {/* Recent Orders */}
+      {/* Recent Orders — real data, most recent 5 */}
       <div className="card overflow-hidden">
         <div className="px-6 py-4 border-b border-[var(--color-border)]">
-          <h2 className="text-lg font-bold text-[var(--color-text-primary)]">
-            Recent Orders
-          </h2>
+          <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Recent Orders</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[var(--color-background)] border-b border-[var(--color-border)]">
               <tr>
-                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Restaurant
-                </th>
-                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">
-                  Time
-                </th>
+                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Order ID</th>
+                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Restaurant</th>
+                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Amount</th>
+                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Status</th>
+                <th className="px-6 py-3 text-left font-bold text-[var(--color-text-primary)] text-sm">Time</th>
               </tr>
             </thead>
             <tbody>
-              {[
-                {
-                  id: '#ORD-4256',
-                  customer: 'Rajesh K.',
-                  restaurant: 'Bukhara',
-                  amount: '₹480',
-                  status: 'Delivered',
-                  time: '2 min ago',
-                },
-                {
-                  id: '#ORD-4255',
-                  customer: 'Priya S.',
-                  restaurant: 'Natraj',
-                  amount: '₹320',
-                  status: 'Delivered',
-                  time: '15 min ago',
-                },
-                {
-                  id: '#ORD-4254',
-                  customer: 'Amit P.',
-                  restaurant: 'Biryani House',
-                  amount: '₹650',
-                  status: 'Delivered',
-                  time: '28 min ago',
-                },
-                {
-                  id: '#ORD-4253',
-                  customer: 'Neha V.',
-                  restaurant: 'Pizza Hut',
-                  amount: '₹520',
-                  status: 'In Transit',
-                  time: '12 min ago',
-                },
-                {
-                  id: '#ORD-4252',
-                  customer: 'Vikram S.',
-                  restaurant: 'Momos Corner',
-                  amount: '₹280',
-                  status: 'Preparing',
-                  time: '5 min ago',
-                },
-              ].map((order, idx) => (
-                <tr
-                  key={idx}
-                  className={`border-b border-[var(--color-border)] ${
-                    idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-background)]'
-                  }`}
-                >
-                  <td className="px-6 py-4 font-medium text-[var(--color-text-primary)] text-sm">
-                    {order.id}
-                  </td>
-                  <td className="px-6 py-4 text-[var(--color-text-secondary)] text-sm">
-                    {order.customer}
-                  </td>
-                  <td className="px-6 py-4 text-[var(--color-text-secondary)] text-sm">
-                    {order.restaurant}
-                  </td>
-                  <td className="px-6 py-4 font-bold text-[var(--color-primary-orange)] text-sm">
-                    {order.amount}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                        order.status === 'Delivered'
-                          ? 'bg-[var(--color-success)] bg-opacity-10 text-[var(--color-success)]'
-                          : order.status === 'In Transit'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-[var(--color-warning)] bg-opacity-10 text-[var(--color-warning)]'
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-[var(--color-text-muted)] text-sm">
-                    {order.time}
+              {recentOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-[var(--color-text-muted)] text-sm">
+                    No orders placed yet.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                recentOrders.map((order, idx) => (
+                  <tr
+                    key={order._id}
+                    className={`border-b border-[var(--color-border)] ${
+                      idx % 2 === 0 ? 'bg-white' : 'bg-[var(--color-background)]'
+                    }`}
+                  >
+                    <td className="px-6 py-4 font-medium text-[var(--color-text-primary)] text-sm">
+                      #{order._id.slice(-6).toUpperCase()}
+                    </td>
+                    <td className="px-6 py-4 text-[var(--color-text-secondary)] text-sm">
+                      {restaurantNames[order.restaurantId] ?? order.restaurantId}
+                    </td>
+                    <td className="px-6 py-4 font-bold text-[var(--color-primary-orange)] text-sm">
+                      ₹{Math.round(order.finalAmount)}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold capitalize ${
+                          order.status === 'delivered'
+                            ? 'bg-[var(--color-success)] bg-opacity-10 text-[var(--color-success)]'
+                            : order.status === 'pending' || order.status === 'confirmed'
+                              ? 'bg-[var(--color-warning)] bg-opacity-10 text-[var(--color-warning)]'
+                              : 'bg-blue-100 text-blue-700'
+                        }`}
+                      >
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-[var(--color-text-muted)] text-sm">
+                      {relativeTime(order.createdAt)}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -356,12 +313,10 @@ export default function AnalyticsPage() {
 function KPICard({
   title,
   value,
-  trend,
   icon,
 }: {
   title: string;
   value: string | number;
-  trend: number;
   icon: React.ReactNode;
 }) {
   return (
@@ -370,18 +325,6 @@ function KPICard({
         <div className="flex-1">
           <p className="text-sm text-[var(--color-text-muted)] font-medium">{title}</p>
           <p className="text-2xl font-bold text-[var(--color-text-primary)] mt-2">{value}</p>
-          <div
-            className={`flex items-center gap-1 mt-2 ${
-              trend > 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'
-            }`}
-          >
-            {trend > 0 ? (
-              <TrendingUp className="w-4 h-4" />
-            ) : (
-              <TrendingDown className="w-4 h-4" />
-            )}
-            <span className="text-xs font-medium">{Math.abs(trend)}%</span>
-          </div>
         </div>
         <div>{icon}</div>
       </div>
@@ -395,18 +338,13 @@ function RevenueItem({
   color,
 }: {
   label: string;
-  value: number;
   percentage: number;
-  color: string;
+  color: 'orange' | 'blue';
 }) {
   const colorMap = {
     orange: 'bg-[var(--color-primary-orange)]',
     blue: 'bg-blue-500',
-    danger: 'bg-[var(--color-danger)]',
-    success: 'bg-[var(--color-success)]',
   };
-
-  const key = color as keyof typeof colorMap;
 
   return (
     <div>
@@ -417,7 +355,10 @@ function RevenueItem({
         </span>
       </div>
       <div className="w-full bg-[var(--color-background)] rounded-full h-2">
-        <div className={`${colorMap[key]} h-2 rounded-full transition-all`} style={{ width: `${percentage}%` }} />
+        <div
+          className={`${colorMap[color]} h-2 rounded-full transition-all`}
+          style={{ width: `${percentage}%` }}
+        />
       </div>
     </div>
   );

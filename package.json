@@ -7,28 +7,22 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "start:server": "node server.js",
-        "loadtest": "artillery run loadtest.yml || true",
         "lint": "next lint",
         "type-check": "tsc --noEmit",
         "test": "jest",
         "test:playwright": "playwright test",
         "test:playwright:headed": "playwright test --headed",
-        "postinstall": "prisma generate --schema=src/db/prisma/schema.prisma"
+        "db:seed": "tsx scripts/seed.ts"
     },
     "dependencies": {
-        "@prisma/client": "^5.0.0",
         "chart.js": "^4.4.0",
-        "ioredis": "^5.8.2",
         "lucide-react": "^0.263.1",
         "mongoose": "^7.0.0",
         "next": "^14.0.0",
         "react": "^18.2.0",
         "react-chartjs-2": "^5.2.0",
         "react-dom": "^18.2.0",
-        "redis": "^4.6.7",
-        "@socket.io/redis-adapter": "^7.1.0",
-        "socket.io": "^4.8.3"
+        "server-only": "^0.0.1"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.28.5",
@@ -39,13 +33,13 @@
         "@types/react-dom": "^18.2.0",
         "autoprefixer": "^10.4.16",
         "babel-jest": "^30.2.0",
+        "dotenv": "^16.4.5",
         "jest": "^30.2.0",
         "postcss": "^8.4.32",
-        "prisma": "^5.0.0",
-        "artillery": "^2.0.0-rc.15",
         "@playwright/test": "^1.37.0",
         "tailwindcss": "^3.4.1",
         "ts-jest": "^29.4.6",
+        "tsx": "^4.19.0",
         "typescript": "^5.3.0"
     },
     "engines": {

@@ -53,10 +53,10 @@ body {
         @apply shadow-[var(--shadow-md)] border-[var(--color-primary-orange)];
     }
     .btn-primary {
-        @apply px-4 py-2.5 bg-[var(--color-primary-orange)] text-white rounded-lg font-semibold transition-all duration-200 hover: bg-[var(--color-primary-orange-dark)] active: scale-95;
+        @apply px-4 py-2.5 bg-[var(--color-primary-orange)] text-white rounded-lg font-semibold transition-all duration-200 hover:bg-[var(--color-primary-orange-dark)] active:scale-95;
     }
     .btn-secondary {
-        @apply px-4 py-2.5 bg-white text-[var(--color-text-primary)] border border-[var(--color-border)] rounded-lg font-semibold transition-all duration-200 hover: border-[var(--color-primary-orange)] hover: text-[var(--color-primary-orange)];
+        @apply px-4 py-2.5 bg-white text-[var(--color-text-primary)] border border-[var(--color-border)] rounded-lg font-semibold transition-all duration-200 hover:border-[var(--color-primary-orange)] hover:text-[var(--color-primary-orange)];
     }
     .badge-success {
         @apply inline-flex items-center px-2 py-1 rounded-full bg-[#F0F9FF] text-[var(--color-success)] text-xs font-semibold;
@@ -115,6 +115,6 @@ body {
 
 @layer components {
     .focus-ring {
-        @apply focus: outline-none focus: ring-2 focus: ring-offset-2 focus: ring-[var(--color-primary-orange)];
+        @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary-orange)];
     }
 }
