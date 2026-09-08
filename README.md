@@ -1,18 +1,55 @@
-# QuickEats - Swiggy-Inspired Food Delivery Platform
+# QuickEats - Modern Food Delivery Platform
 
-A **production-grade food delivery web application** with **dynamic surge pricing**, built with Next.js 13 App Router, TypeScript, and Tailwind CSS. This project demonstrates a complete **system design** for a Swiggy-like platform. [ https://quickeats-inky.vercel.app/](https://quickeats7-k0c6du0xi-hasan8936s-projects.vercel.app/)
+A **production-grade food delivery web application** with **modern UI/UX redesign**, **MongoDB database integration**, and **complete REST API**, built with Next.js 14, React 18, TypeScript, and Tailwind CSS.
 
 ## 🎯 Project Overview
 
 **QuickEats** is a full-featured food delivery platform showcasing:
 
-- ✅ **Swiggy-like UI/UX** with clean, modern design
-- ✅ **Dynamic Surge Pricing Engine** - real-time demand/supply based pricing
-- ✅ **Multi-Zone Architecture** - zone-wise inventory and delivery partner management
-- ✅ **Real-time Analytics Dashboard** - comprehensive business metrics
-- ✅ **Delivery Partner Management** - partner status tracking and earnings
-- ✅ **Responsive Design** - mobile-first, fully responsive
-- ✅ **Production-Ready Code** - TypeScript, scalable architecture
+- ✅ **Modern UI/UX Design System** - Vibrant, accessible, mobile-first
+- ✅ **MongoDB Integration** - Fully typed schemas with Mongoose
+- ✅ **Complete REST API** - 6+ endpoints with validation & error handling
+- ✅ **Dynamic Surge Pricing Engine** - Real-time demand/supply based pricing
+- ✅ **Multi-Zone Architecture** - Zone-wise inventory and delivery partner management
+- ✅ **Real-time Analytics Dashboard** - Comprehensive business metrics
+- ✅ **Responsive Design** - Mobile-first, fully responsive (375px-1440px)
+- ✅ **Production-Ready Code** - TypeScript, scalable architecture, WCAG compliant
+
+---
+
+## 🚀 Quick Start
+
+### 1. Setup MongoDB
+Follow **[MONGODB_SETUP_GUIDE.md](./MONGODB_SETUP_GUIDE.md)** for step-by-step setup:
+- Create MongoDB Atlas account (free tier)
+- Setup database user & connection string
+- Configure network access
+
+### 2. Configure Environment
+```bash
+# Copy template
+cp .env.local.example .env.local
+
+# Edit .env.local with your MongoDB URI
+MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/quickeats_dev
+```
+
+### 3. Install & Run
+```bash
+npm install
+npm run dev
+```
+
+Visit http://localhost:3000 and test the API at http://localhost:3000/api/zones
+
+### 📚 Documentation
+
+| Document | Purpose |
+|----------|---------|
+| **[MONGODB_SETUP_GUIDE.md](./MONGODB_SETUP_GUIDE.md)** | Complete MongoDB setup & troubleshooting |
+| **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)** | Full API reference with examples |
+| **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)** | Summary of all changes & improvements |
+| **[REDESIGN_PLAN.md](./REDESIGN_PLAN.md)** | Comprehensive redesign plan & roadmap |
 
 ---
 
@@ -46,34 +83,57 @@ src/
 
 ---
 
-## 🎨 Design System
+## 🎨 Modern Design System (UI/UX Pro Max)
 
-### Color Palette (Swiggy-Inspired)
+### Color Palette (Vibrant & Food-Focused)
 
 ```css
---color-primary-orange: #FC8019        /* Primary action color */
---color-primary-orange-dark: #E46D0A   /* Hover state */
---color-primary-orange-light: #FFF1E8  /* Light background */
+--color-primary: #EA580C              /* Appetizing Orange */
+--color-secondary: #F97316            /* Vibrant Orange */
+--color-accent: #2563EB               /* Trust Blue (CTA) */
+--color-background: #FFF7ED           /* Warm White */
+--color-foreground: #0F172A           /* Deep Navy */
 
---color-text-primary: #282C3F          /* Main text */
---color-text-secondary: #686B78        /* Secondary text */
---color-text-muted: #93959F            /* Muted text */
+--color-text-primary: #0F172A         /* Main text */
+--color-text-secondary: #475569       /* Secondary text */
+--color-text-muted: #94A3B8           /* Muted text */
 
---color-background: #F8F8F8            /* Page background */
---color-white: #FFFFFF                 /* Card background */
---color-border: #E8E8E8                /* Borders */
-
---color-success: #60B246               /* Success state */
---color-warning: #DB7C38               /* Warning state */
---color-danger: #EF4F5F                /* Danger state */
+--color-success: #60B246              /* Success state */
+--color-warning: #DB7C38              /* Warning state */
+--color-danger: #EF4F5F               /* Danger state */
 ```
 
-### Typography
+**Legacy compatibility**: `--color-primary-orange` still available for backward compatibility
 
-- **Font Stack**: System fonts (-apple-system, BlinkMacSystemFont, Segoe UI, etc.)
-- **Headings**: Bold (800), Sizes 3xl → sm
-- **Body**: Regular (400), Primary text color
-- **Muted**: Secondary text muted color
+### Typography (Google Fonts)
+
+- **Headings**: Playfair Display SC (elegant, culinary aesthetic)
+- **Body**: Karla (modern, clean, highly readable)
+- **Base Size**: 16px, responsive scaling for 375px-1440px
+- **Line Height**: 1.5 for optimal readability
+- **WCAG Compliance**: 4.5:1 contrast ratio (AAA)
+
+### Spacing System
+
+```css
+--space-xs: 4px      /* 1 unit */
+--space-sm: 8px      /* 2 units */
+--space-md: 16px     /* 4 units */
+--space-lg: 24px     /* 6 units */
+--space-xl: 32px     /* 8 units */
+--space-2xl: 48px    /* 12 units */
+--space-3xl: 64px    /* 16 units */
+--space-4xl: 96px    /* 24 units */
+```
+
+### Accessibility Features
+
+- ✅ 4.5:1 text contrast (AAA standard)
+- ✅ Focus rings on all interactive elements
+- ✅ Keyboard navigation support
+- ✅ ARIA labels for screen readers
+- ✅ Reduced motion support (@prefers-reduced-motion)
+- ✅ Touch-friendly targets (44×44px minimum)
 
 ---
 
@@ -248,11 +308,22 @@ Slide-in cart from right side:
 
 | Tech | Purpose |
 |------|---------|
-| **Next.js 13** | App Router, SSR, API routes |
-| **TypeScript** | Type safety, scalability |
+| **Next.js 14** | App Router, SSR, API routes, middleware |
+| **React 18** | Component composition, hooks |
+| **TypeScript** | Full type safety, scalability |
+| **MongoDB** | Document database with Mongoose ODM |
+| **Mongoose** | Schema validation & type definitions |
 | **Tailwind CSS** | Responsive utility-first styling |
-| **Lucide Icons** | 400+ accessible SVG icons |
-| **CSS Variables** | Dynamic theming |
+| **Lucide React** | 400+ accessible SVG icons |
+| **Google Fonts** | Playfair Display SC + Karla |
+| **CSS Variables** | Dynamic design tokens system |
+
+### Database Architecture
+
+- **MongoDB**: Primary database (restaurants, orders, users, zones)
+- **Collections**: 8 fully typed schemas (User, Restaurant, MenuItem, Order, Review, Zone, SurgeEvent, TrafficMetric)
+- **Indexing**: Performance-optimized with automatic indexes
+- **Connection**: Cached connection pool with fallback
 
 ---
 
@@ -373,20 +444,74 @@ npm run test:e2e
 
 ---
 
-## 📚 API Design (Reference)
+## 🌐 REST API Endpoints
 
-### REST Endpoints (to be implemented)
+### ✅ Implemented Endpoints
 
+#### Restaurants
 ```
-GET    /api/v1/zones              # Get all zones
-GET    /api/v1/zones/:id          # Get zone details
-GET    /api/v1/restaurants        # List restaurants
-GET    /api/v1/restaurants/:id    # Restaurant with menu
-POST   /api/v1/orders             # Create order
-GET    /api/v1/orders/:id         # Order status
-GET    /api/v1/partners           # List delivery partners
-POST   /api/v1/surge/config       # Update surge config
-GET    /api/v1/analytics          # Analytics data
+GET    /api/restaurants                    # List restaurants (with filters)
+GET    /api/restaurants/[id]               # Restaurant details + menu + reviews
+```
+
+#### Orders
+```
+GET    /api/orders?userId=xxx              # User's order history
+POST   /api/orders                         # Create new order
+GET    /api/orders/[id]                    # Order details
+PUT    /api/orders/[id]                    # Update order status
+DELETE /api/orders/[id]                    # Cancel order
+```
+
+#### Zones
+```
+GET    /api/zones                          # List all zones
+POST   /api/zones                          # Create new zone
+GET    /api/zones/[id]/surge               # Get surge pricing
+```
+
+### Query Examples
+
+```bash
+# List restaurants in zone with filters
+curl "http://localhost:3000/api/restaurants?zoneId=zone_001&cuisine=Italian&page=1"
+
+# Get restaurant details with menu
+curl "http://localhost:3000/api/restaurants/rest_001"
+
+# Get user's orders
+curl "http://localhost:3000/api/orders?userId=user_001"
+
+# Create new order
+curl -X POST http://localhost:3000/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"user_001","restaurantId":"rest_001","items":[...]}'
+
+# Get surge pricing for zone
+curl "http://localhost:3000/api/zones/zone_001/surge"
+```
+
+See **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)** for complete API reference.
+
+### 🔄 Response Format
+
+All endpoints return consistent JSON:
+
+**Success (200, 201)**
+```json
+{
+  "success": true,
+  "data": { /* endpoint-specific data */ },
+  "pagination": { /* if paginated */ }
+}
+```
+
+**Error (400, 404, 500)**
+```json
+{
+  "success": false,
+  "error": "Error message describing what went wrong"
+}
 ```
 
 ---
