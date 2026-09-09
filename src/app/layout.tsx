@@ -61,11 +61,16 @@ export default function RootLayout({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
-              <Link href="/" className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-                <div className="w-8 h-8 bg-[var(--color-primary-orange)] rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">Q</span>
+              <Link href="/" className="flex items-center gap-2.5 cursor-pointer group">
+                <div className="w-9 h-9 bg-[var(--color-text-primary)] rounded-lg flex items-center justify-center transition-colors group-hover:bg-[var(--color-primary)]">
+                  <span className="text-[var(--color-background)] font-bold text-lg" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>
+                    Q
+                  </span>
                 </div>
-                <span className="font-bold text-xl text-[var(--color-text-primary)] hidden sm:inline">
+                <span
+                  className="font-bold text-xl text-[var(--color-text-primary)] hidden sm:inline"
+                  style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                >
                   QuickEats
                 </span>
               </Link>
@@ -166,42 +171,47 @@ export default function RootLayout({
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-[var(--color-border)] mt-16">
+        <footer className="bg-[var(--color-text-primary)] text-[var(--color-background)] mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-8">
               <div>
-                <h4 className="font-bold text-[var(--color-text-primary)] mb-4">QuickEats</h4>
-                <p className="text-sm text-[var(--color-text-muted)]">
+                <h4
+                  className="font-bold mb-4"
+                  style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                >
+                  QuickEats
+                </h4>
+                <p className="text-sm opacity-70">
                   Fast, reliable food delivery with transparent surge pricing.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold text-[var(--color-text-primary)] mb-4">Company</h4>
-                <ul className="space-y-2 text-sm text-[var(--color-text-muted)]">
-                  <li><a href="#" className="hover:text-[var(--color-primary-orange)] transition-colors">About</a></li>
-                  <li><a href="#" className="hover:text-[var(--color-primary-orange)] transition-colors">Blog</a></li>
-                  <li><a href="#" className="hover:text-[var(--color-primary-orange)] transition-colors">Careers</a></li>
+                <h4 className="font-semibold mb-4">Company</h4>
+                <ul className="space-y-2 text-sm opacity-70">
+                  <li><a href="#" className="hover:opacity-100 transition-opacity">About</a></li>
+                  <li><a href="#" className="hover:opacity-100 transition-opacity">Blog</a></li>
+                  <li><a href="#" className="hover:opacity-100 transition-opacity">Careers</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-[var(--color-text-primary)] mb-4">Support</h4>
-                <ul className="space-y-2 text-sm text-[var(--color-text-muted)]">
-                  <li><a href="#" className="hover:text-[var(--color-primary-orange)] transition-colors">Help Center</a></li>
-                  <li><a href="#" className="hover:text-[var(--color-primary-orange)] transition-colors">Contact</a></li>
-                  <li><a href="#" className="hover:text-[var(--color-primary-orange)] transition-colors">FAQs</a></li>
+                <h4 className="font-semibold mb-4">Support</h4>
+                <ul className="space-y-2 text-sm opacity-70">
+                  <li><a href="#" className="hover:opacity-100 transition-opacity">Help Center</a></li>
+                  <li><a href="#" className="hover:opacity-100 transition-opacity">Contact</a></li>
+                  <li><a href="#" className="hover:opacity-100 transition-opacity">FAQs</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-[var(--color-text-primary)] mb-4">Legal</h4>
-                <ul className="space-y-2 text-sm text-[var(--color-text-muted)]">
-                  <li><a href="#" className="hover:text-[var(--color-primary-orange)] transition-colors">Privacy</a></li>
-                  <li><a href="#" className="hover:text-[var(--color-primary-orange)] transition-colors">Terms</a></li>
-                  <li><a href="#" className="hover:text-[var(--color-primary-orange)] transition-colors">Compliance</a></li>
+                <h4 className="font-semibold mb-4">Legal</h4>
+                <ul className="space-y-2 text-sm opacity-70">
+                  <li><a href="#" className="hover:opacity-100 transition-opacity">Privacy</a></li>
+                  <li><a href="#" className="hover:opacity-100 transition-opacity">Terms</a></li>
+                  <li><a href="#" className="hover:opacity-100 transition-opacity">Compliance</a></li>
                 </ul>
               </div>
             </div>
-            <div className="border-t border-[var(--color-border)] mt-8 pt-8">
-              <p className="text-center text-sm text-[var(--color-text-muted)]">
+            <div className="ticket-perforation mt-8 pt-8 opacity-40">
+              <p className="text-center text-sm">
                 © 2026 QuickEats. All rights reserved.
               </p>
             </div>

@@ -211,43 +211,52 @@ export function CartDrawer({
           </div>
         )}
 
-        {/* Bill Details */}
+        {/* Bill Details — styled as an order ticket: perforated divider,
+            punched side-notches, right-aligned ledger figures. */}
         {items.length > 0 && (
-          <div className="p-4 space-y-3 border-b border-[var(--color-border)]">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-[var(--color-text-secondary)]">Subtotal</span>
-              <PriceDisplay amount={subtotal} size="sm" />
-            </div>
+          <div className="p-4">
+            <div className="ticket p-4 space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-[var(--color-text-secondary)]">Subtotal</span>
+                <span className="ledger-figure">
+                  <PriceDisplay amount={subtotal} size="sm" />
+                </span>
+              </div>
 
-            {surgeMultiplier > 1 && (
-              <>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[var(--color-text-secondary)]">
-                    Base Delivery Fee
-                  </span>
-                  <span className="text-[var(--color-text-muted)] line-through text-xs">
-                    <PriceDisplay amount={baseDeliveryFee} size="sm" />
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm bg-[var(--color-warning)] bg-opacity-10 p-2 rounded-lg">
-                  <span className="text-[var(--color-warning)] font-semibold">
-                    Surge Pricing (+{((surgeMultiplier - 1) * 100).toFixed(0)}%)
-                  </span>
-                  <span className="text-[var(--color-warning)] font-semibold">
-                    +<PriceDisplay amount={surgeCost} showCurrency={false} size="sm" />
-                  </span>
-                </div>
-              </>
-            )}
+              {surgeMultiplier > 1 && (
+                <>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-[var(--color-text-secondary)]">
+                      Base delivery fee
+                    </span>
+                    <span className="ledger-figure text-[var(--color-text-muted)] line-through text-xs">
+                      <PriceDisplay amount={baseDeliveryFee} size="sm" />
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm bg-[var(--color-warning)] bg-opacity-10 p-2 rounded-lg">
+                    <span className="text-[var(--color-warning)] font-semibold">
+                      Surge pricing (+{((surgeMultiplier - 1) * 100).toFixed(0)}%)
+                    </span>
+                    <span className="ledger-figure text-[var(--color-warning)] font-semibold">
+                      +<PriceDisplay amount={surgeCost} showCurrency={false} size="sm" />
+                    </span>
+                  </div>
+                </>
+              )}
 
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-[var(--color-text-secondary)]">Delivery Fee</span>
-              <PriceDisplay amount={surgeDeliveryFee} size="sm" />
-            </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-[var(--color-text-secondary)]">Delivery fee</span>
+                <span className="ledger-figure">
+                  <PriceDisplay amount={surgeDeliveryFee} size="sm" />
+                </span>
+              </div>
 
-            <div className="border-t border-[var(--color-border)] pt-3 flex justify-between items-center font-bold">
-              <span className="text-[var(--color-text-primary)]">Total</span>
-              <PriceDisplay amount={total} size="md" />
+              <div className="ticket-perforation pt-3 flex justify-between items-center font-bold">
+                <span className="text-[var(--color-text-primary)]">Total</span>
+                <span className="ledger-figure">
+                  <PriceDisplay amount={total} size="md" />
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -259,11 +268,13 @@ export function CartDrawer({
             disabled={items.length === 0 || checkoutDisabled}
             className="w-full py-3 bg-[var(--color-primary-orange)] text-white rounded-lg font-bold transition-all duration-200 hover:bg-[var(--color-primary-orange-dark)] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
           >
-            {items.length === 0 ? 'Add items to checkout' : checkoutDisabled ? 'Placing order…' : 'Place Order'}
+            {items.length === 0 ? 'Add items to checkout' : checkoutDisabled ? 'Placing order…' : 'Place order'}
           </button>
-          <p className="text-xs text-center text-[var(--color-text-muted)] mt-2">
-            You'll save more with a bigger order
-          </p>
+          {surgeMultiplier > 1 && (
+            <p className="text-xs text-center text-[var(--color-text-muted)] mt-2">
+              Delivery fee is higher right now due to demand in your area.
+            </p>
+          )}
         </div>
       </div>
     </>

@@ -63,12 +63,7 @@ export function RestaurantCard({
       {/* Content */}
       <div className="p-4">
         <h3 className="font-bold text-[var(--color-text-primary)] mb-1 text-lg">{name}</h3>
-        <p className="text-sm text-[var(--color-text-muted)] mb-2">{cuisine}</p>
-
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs px-2 py-1 rounded-full bg-[var(--color-primary-orange-light)] text-[var(--color-primary-orange)] font-semibold">{cuisine.split(',')[0]}</span>
-          <span className="text-xs px-2 py-1 rounded-full bg-[var(--color-background)] text-[var(--color-text-muted)]">{deliveryTime} min</span>
-        </div>
+        <p className="text-sm text-[var(--color-text-muted)] mb-3">{cuisine}</p>
 
         {/* Pricing & Time */}
         <div className="flex items-center justify-between">

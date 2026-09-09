@@ -111,11 +111,14 @@ export function HomePageClient({ zones, restaurants }: HomePageClientProps) {
 
       {/* Header Section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">
-          Order Food Online
+        <h1
+          className="text-4xl sm:text-5xl text-[var(--color-text-primary)] mb-3"
+          style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+        >
+          What are you craving?
         </h1>
-        <p className="text-[var(--color-text-muted)] mb-4">
-          Browse restaurants in {selectedZone.name}
+        <p className="text-[var(--color-text-secondary)] mb-6">
+          {zoneRestaurants.length} restaurants delivering to {selectedZone.name} right now.
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
