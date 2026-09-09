@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 
-export function handleMongoDBError(error: any) {
+export function handleMongoDBError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
   console.error('MongoDB Error:', error);
 
   // If MongoDB URI is not configured
-  if (error.message?.includes('MONGODB_URI') || !process.env.MONGODB_URI) {
+  if (message.includes('MONGODB_URI') || !process.env.MONGODB_URI) {
     return NextResponse.json(
       {
         success: false,
@@ -17,7 +18,7 @@ export function handleMongoDBError(error: any) {
   }
 
   // Connection refused
-  if (error.message?.includes('ECONNREFUSED')) {
+  if (message.includes('ECONNREFUSED')) {
     return NextResponse.json(
       {
         success: false,
@@ -29,7 +30,7 @@ export function handleMongoDBError(error: any) {
   }
 
   // Authentication failed
-  if (error.message?.includes('auth failed') || error.message?.includes('authentication failed')) {
+  if (message.includes('auth failed') || message.includes('authentication failed')) {
     return NextResponse.json(
       {
         success: false,
@@ -45,7 +46,7 @@ export function handleMongoDBError(error: any) {
     {
       success: false,
       error: 'Database error',
-      message: error.message || 'An error occurred while accessing the database',
+      message: message || 'An error occurred while accessing the database',
     },
     { status: 500 }
   );

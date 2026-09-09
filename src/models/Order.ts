@@ -7,7 +7,8 @@ export type OrderStatus =
   | 'cooking'
   | 'ready'
   | 'picked'
-  | 'delivered';
+  | 'delivered'
+  | 'cancelled';
 
 export interface OrderDocument extends mongoose.Document {
   restaurantId: string;
@@ -46,7 +47,7 @@ const OrderSchema = new Schema<OrderDocument>(
     finalAmount: { type: Number, required: true, min: 0 },
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'cooking', 'ready', 'picked', 'delivered'],
+      enum: ['pending', 'confirmed', 'cooking', 'ready', 'picked', 'delivered', 'cancelled'],
       default: 'pending',
       index: true,
     },

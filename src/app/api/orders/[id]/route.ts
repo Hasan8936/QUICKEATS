@@ -1,104 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB } from '@/lib/mongodb';
-import { Order } from '@/db/mongoose/models';
+import { connectToDatabase } from '@/lib/mongodb';
+import { Order, OrderStatus } from '@/models/Order';
+import { handleMongoDBError } from '@/lib/mongodbError';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+const VALID_STATUSES: OrderStatus[] = [
+  'pending',
+  'confirmed',
+  'cooking',
+  'ready',
+  'picked',
+  'delivered',
+  'cancelled',
+];
+
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await connectDB();
-
-    const order = await Order.findById(params.id);
+    await connectToDatabase();
+    const order = await Order.findById(params.id).lean();
     if (!order) {
-      return NextResponse.json(
-        { success: false, error: 'Order not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
-
-    return NextResponse.json(
-      { success: true, data: order },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, data: order });
   } catch (error) {
-    console.error('GET /api/orders/[id] error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch order' },
-      { status: 500 }
-    );
+    return handleMongoDBError(error);
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// PUT { status } — update an order's status (e.g. kitchen marking it
+// "cooking", a partner marking it "picked" / "delivered").
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await connectDB();
-
-    const body = await request.json();
-    const { status, paymentStatus } = body;
-
-    const order = await Order.findByIdAndUpdate(
-      params.id,
-      { status, paymentStatus },
-      { new: true, runValidators: true }
-    );
-
-    if (!order) {
+    const { status } = await request.json();
+    if (!VALID_STATUSES.includes(status)) {
       return NextResponse.json(
-        { success: false, error: 'Order not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(
-      { success: true, data: order },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('PUT /api/orders/[id] error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to update order' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    await connectDB();
-
-    const order = await Order.findById(params.id);
-    if (!order) {
-      return NextResponse.json(
-        { success: false, error: 'Order not found' },
-        { status: 404 }
-      );
-    }
-
-    if (order.status !== 'pending') {
-      return NextResponse.json(
-        { success: false, error: 'Cannot cancel order in current status' },
+        { success: false, error: `status must be one of: ${VALID_STATUSES.join(', ')}` },
         { status: 400 }
       );
     }
 
-    await Order.findByIdAndUpdate(params.id, { status: 'cancelled' });
+    await connectToDatabase();
+    const update: Record<string, unknown> = { status };
+    if (status === 'delivered') update.deliveredAt = new Date();
 
-    return NextResponse.json(
-      { success: true, message: 'Order cancelled successfully' },
-      { status: 200 }
-    );
+    const order = await Order.findByIdAndUpdate(params.id, update, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!order) {
+      return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: order });
   } catch (error) {
-    console.error('DELETE /api/orders/[id] error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to cancel order' },
-      { status: 500 }
-    );
+    return handleMongoDBError(error);
+  }
+}
+
+// DELETE — cancel an order. Only allowed while still pending, matching the
+// original intent of this endpoint (can't cancel food that's already
+// cooking). Sets status to 'cancelled' rather than deleting the record, so
+// it's preserved for analytics/audit history.
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    await connectToDatabase();
+    const order = await Order.findById(params.id);
+    if (!order) {
+      return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
+    }
+
+    if (order.status !== 'pending') {
+      return NextResponse.json(
+        { success: false, error: 'Cannot cancel an order once the kitchen has started on it' },
+        { status: 400 }
+      );
+    }
+
+    order.status = 'cancelled';
+    await order.save();
+    return NextResponse.json({ success: true, message: 'Order cancelled', data: order });
+  } catch (error) {
+    return handleMongoDBError(error);
   }
 }
